@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+# find script location
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+usage() {
+  cat <<- EOF
+
+  scaffold new python module and correctponding test file
+
+  usage: $0 <module>
+
+    module: path/to/module
+
+EOF
+}
+
+main() {
+    local module="${MODULE//.//}"
+    local modpath
+    local modtestpath
+
+    modpath="$(cd "$DIR/../" && pwd)/$module"
+    mkdir -p "$modpath"
+    echo "$MODFILE" > "$modpath/__init__.py"
+
+    modtestpath="$(cd "$DIR/../" && pwd)/tests/$module"
+    mkdir -p "$modtestpath"
+    echo "$TESTFILE" > "$modtestpath/__init__.py"
+}
+
+if [ "$#" -lt 1 ]; then usage; exit 1; fi # if no parameters show usage and die
+
+MODULE="${1}"
+
+MODFILE=$(cat <<EOF
+
+def hello():
+    return "Hello, World!"
+
+EOF
+)
+
+TESTFILE=$(cat <<EOF
+from unittest import TestCase
+
+from $MODULE import hello
+
+
+class TestRussian(TestCase):
+    def test_hello(self):
+        """
+        test that function output is Hello, world!
+        """
+        expect = "Hello, World!"
+        result = hello()
+        self.assertEqual(result, expect)
+
+"""
+| Method	              | Equivalent to    |
+|-------------------------|------------------|              
+| .assertEqual(a, b)	  | a == b           |
+| .assertTrue(x)	      | bool(x) is True  |
+| .assertFalse(x)	      | bool(x) is False |
+| .assertIs(a, b)         | a is b           |
+| .assertIsNone(x)	      | x is None        |
+| .assertIn(a, b)	      | a in b           |
+| .assertIsInstance(a, b) | isinstance(a, b) |
+"""
+
+EOF
+)
+
+main

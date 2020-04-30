@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# find script location
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+usage() {
+  cat <<- EOF
+
+  scaffold new python module and correctponding test file
+
+  usage: $0 <module> [script]
+
+    module: path/to/module
+    script: script file name [default scratch.py]
+
+EOF
+}
+
+main() {
+    local module="${MODULE//.//}"
+    local modpath
+    modpath="$(cd "$DIR/../" && pwd)/$module"
+    mkdir -p "$modpath"
+    echo "$SCRIPTFILE" > "$modpath/$SCRIPT.py"
+    chmod +x "$modpath/$SCRIPT.py"
+}
+
+if [ "$#" -lt 1 ]; then usage; exit 1; fi # if no parameters show usage and die
+
+MODULE="${1}"
+SCRIPT="${2:-scratch}"
+
+SCRIPTFILE=$(cat <<EOF
+#!/usr/bin/env python3
+
+def hello():
+    return "Hello, World!"
+
+if __name__ == "__main__":
+    print(hello())
+
+EOF
+)
+
+
+main
