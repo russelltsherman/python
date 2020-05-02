@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+# func is like mod except the last element of the module name will be created

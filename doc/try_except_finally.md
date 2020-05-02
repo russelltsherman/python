@@ -1,0 +1,27 @@
+# Python Try Except
+
+The `try` block lets you test a block of code for errors.
+
+The `except` block lets you handle the error.
+
+The `finally` block lets you execute code, regardless of the result of the try- and except blocks.
+
+## Exception Handling
+
+When an error occurs, or exception as we call it, Python will normally stop and generate an error message.
+These exceptions can be handled using the try statement:
+
+```py
+try:
+    print(x)
+
+except NameError:
+    print("except: Specific")
+except:
+    print("except: Generic")
+else:
+    print("There were no exceptions")
+finally:
+    print("finally: always do this regardless of exceptions")
+
+```
