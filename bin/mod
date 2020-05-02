@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # find script location
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -13,6 +15,35 @@ usage() {
     module: path/to/module
 
 EOF
+}
+
+# validate format of provided
+validate_modulename() {
+    case $1 in
+    .* ) 
+        echo "module name should not start with period"
+        exit 1 
+        ;;    
+    *. ) 
+        echo "module name should not end with period"
+        exit 1 
+        ;;   
+    *[^a-zA-Z.]* ) 
+        echo "module name should include only alpha characters"
+        exit 1
+        ;;
+    esac
+    echo "$1"
+}
+# capitalize first letter of each word in string
+title_case() { 
+    echo "$1" | gsed -E "s/[[:alnum:]_'-]+/\u&/g"
+}
+# convert module name to class name
+classify() {
+    local titlecased
+    titlecased=$(title_case "$1")
+    echo "${titlecased//.}"
 }
 
 main() {
@@ -31,7 +62,10 @@ main() {
 
 if [ "$#" -lt 1 ]; then usage; exit 1; fi # if no parameters show usage and die
 
+validate_modulename "${1}"
+
 MODULE="${1}"
+Module="$(classify "$MODULE")"
 
 MODFILE=$(cat <<EOF
 
@@ -46,8 +80,7 @@ from unittest import TestCase
 
 from $MODULE import hello
 
-
-class TestRussian(TestCase):
+class Test$Module(TestCase):
     def test_hello(self):
         """
         test that function output is Hello, world!
@@ -72,3 +105,6 @@ EOF
 )
 
 main
+
+# TODO
+# for multidepth mod an __init__.py file should be written at each folder depth
