@@ -1,1 +1,1 @@
-from challenges.pyifelse import hello
+from challenges.pyifelse.is_weird import is_weird

@@ -1,5 +1,5 @@
 
-def hello(n):
+def is_weird(n):
     if n % 2 == 1:  # is odd number
         return("Weird")
     else:  # is even number
