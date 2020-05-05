@@ -1,0 +1,3 @@
+from challenges.hashmaps.sherlockAndAnagrams import sherlockAndAnagrams
+from challenges.hashmaps.countTriplets import countTriplets
+from challenges.hashmaps.frequencyQuery import frequencyQuery

@@ -2,8 +2,8 @@
 import time
 from unittest import TestCase
 
-from russian.algorythm import russian
-from russian.caching import caching
+from challenges.russian import russian
+from challenges.russian import caching
 
 
 class TestRussian(TestCase):
