@@ -12,7 +12,7 @@ usage() {
 
   usage: $0 <module>
 
-    module: path/to/module
+    module: path.to.module
 
 EOF
 }
@@ -32,6 +32,9 @@ validate_modulename() {
         echo "module name should include only alpha characters"
         exit 1
         ;;
+    *..* )
+        echo "module name contains duplicated periods"
+        exit 1    
     esac
     echo "$1"
 }
@@ -50,13 +53,23 @@ main() {
     local module="${MODULE//.//}"
     local modpath
     local modtestpath
-
-    modpath="$(cd "$DIR/../" && pwd)/$module"
+    moddir="$(cd "$DIR/../" && pwd)/"
+    modpath="$moddir/$module"
+    testdir="$moddir/tests/"
+    modtestpath="$moddir/tests/$module"
     mkdir -p "$modpath"
-    echo "$MODFILE" > "$modpath/__init__.py"
-
-    modtestpath="$(cd "$DIR/../" && pwd)/tests/$module"
     mkdir -p "$modtestpath"
+
+    dirs=$(echo "$MODULE" | tr "." "\n")
+    for dir in $dirs
+    do
+        moddir="$moddir/$dir"
+        touch "$moddir/__init__.py"
+        testdir="$testdir/$dir"
+        touch "$testdir/__init__.py"
+    done
+
+    echo "$MODFILE" > "$modpath/__init__.py"
     echo "$TESTFILE" > "$modtestpath/__init__.py"
 }
 
@@ -105,6 +118,3 @@ EOF
 )
 
 main
-
-# TODO
-# for multidepth mod an __init__.py file should be written at each folder depth

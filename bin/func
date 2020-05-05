@@ -1,3 +1,111 @@
 #!/usr/bin/env bash
 
-# func is like mod except the last element of the module name will be created
+set -e
+
+# find script location
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+usage() {
+  cat <<- EOF
+
+  scaffold new python module function and correcsponding test file
+
+  usage: $0 <module>
+
+    module: path.to.module.function
+
+EOF
+}
+
+# validate format of provided
+validate_modulename() {
+    case $1 in
+    .* ) 
+        echo "module name should not start with period"
+        exit 1 
+        ;;    
+    *. ) 
+        echo "module name should not end with period"
+        exit 1 
+        ;;   
+    *[^a-zA-Z.]* ) 
+        echo "module name should include only alpha characters"
+        exit 1
+        ;;
+    *..* )
+        echo "module name contains duplicated periods"
+        exit 1    
+    esac
+    echo "$1"
+}
+# capitalize first letter of each word in string
+title_case() { 
+    echo "$1" | gsed -E "s/[[:alnum:]_'-]+/\u&/g"
+}
+# convert module name to class name
+classify() {
+    local titlecased
+    titlecased=$(title_case "$1")
+    echo "${titlecased//.}"
+}
+
+main() {
+    local module="${MODULE//.//}"
+    local modpath
+    local modtestpath
+    moddir="$(cd "$DIR/../" && pwd)/"
+    modpath="$moddir/$module"
+    testdir="$moddir/tests/"
+    modtestpath="$moddir/tests/$module"
+    mkdir -p "$modpath"
+    mkdir -p "$modtestpath"
+
+    dirs=$(echo "$MODULE" | tr "." "\n")
+    for dir in $dirs
+    do
+        moddir="$moddir/$dir"
+        touch "$moddir/__init__.py"
+        testdir="$testdir/$dir"
+        touch "$testdir/__init__.py"
+    done
+
+    local import="from $MODULE.$FUNCTION import $FUNCTION"
+    local file="$modpath/__init__.py"
+    grep -qF -- "$import" "$file" || echo "$import" >> "$file"
+
+    echo "$MODFILE" > "$modpath/$FUNCTION.py"
+    echo "$TESTFILE" > "$modtestpath/test_$FUNCTION.py"
+}
+
+if [ "$#" -lt 1 ]; then usage; exit 1; fi # if no parameters show usage and die
+
+validate_modulename "${1}"
+
+MODULE=${1%.*}  # retain the part before the colon
+FUNCTION=${1##*.}  # retain the part after the last slash
+Module="$(classify "$1")"
+
+MODFILE=$(cat <<EOF
+
+def $FUNCTION():
+    return "Hello, World!"
+
+EOF
+)
+
+TESTFILE=$(cat <<EOF
+from unittest import TestCase
+
+from $MODULE import $FUNCTION
+
+
+class Test$Module(TestCase):
+    def test_$FUNCTION(self):
+        expect = "Hello, World!"
+        result = $FUNCTION()
+        self.assertEqual(result, expect)
+
+EOF
+)
+
+main
